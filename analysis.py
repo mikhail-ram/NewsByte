@@ -1,10 +1,10 @@
 from collections import Counter
 from typing import List, Dict, Any
 
-from config import sentiment_analyzer, logger
+from config import logger
 
 
-def analyze_sentiment(text: str) -> str:
+def analyze_sentiment(sentiment_analyzer, text: str) -> str:
     try:
         result = sentiment_analyzer(text)
         label = result[0]['label']
@@ -23,7 +23,7 @@ def analyze_sentiment(text: str) -> str:
         return "Unknown"
 
 
-def attach_sentiment_to_articles(articles: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+def attach_sentiment_to_articles(sentiment_analyzer, articles: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
     processed_articles = []
     for article in articles:
         # Check that the article is a dictionary
@@ -40,7 +40,7 @@ def attach_sentiment_to_articles(articles: List[Dict[str, Any]]) -> List[Dict[st
             sentiment = "Unknown"
         else:
             try:
-                sentiment = analyze_sentiment(summary)
+                sentiment = analyze_sentiment(sentiment_analyzer, summary)
             except Exception as e:
                 logger.debug(f"Error analyzing sentiment for article: {e}")
                 sentiment = "Unknown"

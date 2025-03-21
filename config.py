@@ -1,7 +1,6 @@
 import logging
 import nltk
 import spacy
-from transformers import pipeline
 
 nltk.download('punkt', quiet=True)
 nltk.download('averaged_perceptron_tagger', quiet=True)
@@ -21,6 +20,3 @@ DEBUG_MODE = True
 if DEBUG_MODE:
     logger.setLevel(logging.DEBUG)
     ch.setLevel(logging.DEBUG)
-
-sentiment_analyzer = pipeline(
-    "sentiment-analysis", model="nlptown/bert-base-multilingual-uncased-sentiment")

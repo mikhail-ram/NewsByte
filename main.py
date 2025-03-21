@@ -1,6 +1,7 @@
 import time
 from typing import Dict, Any, List
 import asyncio
+from transformers import pipeline
 
 from config import logger
 from scraping import fetch_news_articles
@@ -12,18 +13,21 @@ from tts import translate_text, hindi_tts
 
 def run_newsbyte(company: str, num_articles: int = 10) -> Dict[str, Any]:
     model = create_model("deepseek/deepseek-r1:free")
+    sentiment_analyzer = pipeline(
+        "sentiment-analysis", model="nlptown/bert-base-multilingual-uncased-sentiment")
 
     logger.debug(f"Starting news fetch for {company}")
-    raw_articles = fetch_news_articles(company, num_articles=num_articles)
-    logger.debug(f"Fetched {len(raw_articles)} articles.")
+    articles = fetch_news_articles(company, num_articles=num_articles)
+    logger.debug(f"Fetched {len(articles)} articles.")
 
     # Extract topics and summaries using LLM
-    articles_summaries = extract_articles_summary(model, raw_articles)
-    merged_articles = merge_articles(raw_articles, articles_summaries)
+    articles_summaries = extract_articles_summary(model, articles)
+    merged_articles = merge_articles(articles, articles_summaries)
 
     # Attach sentiment analysis based on summary
     logger.debug("Attaching sentiment to articles.")
-    articles_with_sentiment = attach_sentiment_to_articles(merged_articles)
+    articles_with_sentiment = attach_sentiment_to_articles(
+        sentiment_analyzer, merged_articles)
 
     logger.debug("Extracting comparative sentiment score.")
     comp_score = extract_comparative_sentiment_score(
