@@ -5,6 +5,7 @@ from newspaper import Article
 import trafilatura
 from langdetect import detect
 from typing import List, Dict, Any, Optional
+import time
 
 from config import logger
 
@@ -26,14 +27,25 @@ def build_search_url(company_name: str, start: int = 0) -> str:
     return url
 
 
-def fetch_url_content(url: str, headers: Optional[Dict[str, str]] = None) -> str:
+def fetch_url_content(url: str, headers: Optional[Dict[str, str]] = None, retries: int = 3, delay: int = 1) -> str:
     if headers is None:
         headers = {"User-Agent": "Mozilla/5.0"}
     logger.debug(f"Fetching URL: {url}")
-    response = requests.get(url, headers=headers)
-    response.raise_for_status()
-    logger.debug(f"Received response with status code: {response.status_code}")
-    return response.text
+    last_exception = None
+    for attempt in range(retries):
+        try:
+            response = requests.get(url, headers=headers, timeout=10)
+            response.raise_for_status()
+            logger.debug(
+                f"Received response with status code: {response.status_code}")
+            return response.text
+        except requests.exceptions.RequestException as e:
+            last_exception = e
+            logger.error(f"Attempt {attempt + 1} failed with error: {e}")
+            time.sleep(delay)
+    # After all retries fail, raise the last encountered exception.
+    raise Exception(
+        f"Failed to fetch URL content after {retries} attempts. Last error: {last_exception}")
 
 
 def parse_html(html: str) -> BeautifulSoup:
@@ -66,7 +78,7 @@ def is_english(text: str) -> bool:
     try:
         return detect(text) == "en"
     except Exception as e:
-        logger.debug(f"Language detection failed: {e}")
+        logger.error(f"Language detection failed: {e}")
         return False
 
 
@@ -89,7 +101,7 @@ def extract_article_text(url: str) -> Optional[Dict[str, Any]]:
             "publish_date": str(article.publish_date) if article.publish_date else None
         }
     except Exception as e:
-        logger.debug(f"Error extracting article details for URL {url}: {e}")
+        logger.error(f"Error extracting article details for URL {url}: {e}")
         return None
 
 
@@ -108,7 +120,7 @@ def process_candidate(element: Any) -> Optional[Dict[str, Any]]:
 
 def fetch_candidate_articles(company: str, start: int, headers: Dict[str, str]) -> List[Dict[str, Any]]:
     search_url = build_search_url(company, start)
-    html = fetch_url_content(search_url, headers)
+    html = fetch_url_content(search_url, headers, retries=3, delay=1)
     soup = parse_html(html)
     elements = extract_candidate_elements(soup)
     return [candidate for candidate in (process_candidate(el) for el in elements) if candidate]
