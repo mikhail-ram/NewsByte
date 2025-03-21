@@ -1,4 +1,3 @@
-import os
 import logging
 import nltk
 import spacy

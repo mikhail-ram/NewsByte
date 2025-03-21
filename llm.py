@@ -7,6 +7,19 @@ from outlines.models.openai import OpenAIConfig
 from openai import AsyncOpenAI
 
 from data_models import ArticlesList, ComparativeSentimentScore
+from config import logger
+
+
+def retry_prompt(generator_func, prompt: str, retries: int = 3):
+    last_exception = None
+    for attempt in range(retries):
+        try:
+            return generator_func(prompt)
+        except Exception as e:
+            last_exception = e
+            logger.error(f"Attempt {attempt + 1} failed with error: {e}")
+    raise Exception(
+        f"LLM prompt failed after {retries} attempts. Last error: {last_exception}")
 
 
 def create_model(model_name: str):
@@ -33,7 +46,7 @@ def extract_articles_summary(model, articles: List[Dict[str, Any]]) -> List[Dict
         '{ "topics": ["keywordA", "keywordB", "keywordC"], "summary": "Another summary here." } ]'
     )
     generator = generate.json(model, ArticlesList)
-    result = generator(prompt)
+    result = retry_prompt(generator, prompt, 3)
     return [article_summary.model_dump() for article_summary in result.root]
 
 
@@ -76,7 +89,7 @@ def extract_comparative_sentiment_score(model, articles: List[Dict[str, Any]]) -
         "}"
     )
     generator = generate.json(model, ComparativeSentimentScore)
-    result = generator(prompt)
+    result = retry_prompt(generator, prompt, 3)
     return result
 
 
@@ -93,4 +106,5 @@ def extract_final_sentiment_analysis(model, company: str, comparative_score: Dic
         f"{json.dumps(comparative_score, separators=(',', ':'))}\n\n"
     )
     generator = generate.text(model)
-    return generator(prompt)
+    result = retry_prompt(generator, prompt, 3)
+    return result
