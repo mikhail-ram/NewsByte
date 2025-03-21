@@ -1,10 +1,6 @@
 from typing import List, Dict, Any
 from pydantic import BaseModel, conlist, RootModel, Field, model_validator
 
-# -----------------------------------------------------------------------------
-# Pydantic Schemas (unchanged)
-# -----------------------------------------------------------------------------
-
 
 class ArticleSummary(BaseModel):
     topics: conlist(str, min_length=3, max_length=3)
