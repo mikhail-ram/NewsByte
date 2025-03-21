@@ -55,6 +55,7 @@ def extract_comparative_sentiment_score(model, articles: List[Dict[str, Any]]) -
         "  'Unique Topics in Article 1', 'Unique Topics in Article 2', ..., 'Unique Topics in Article n':\n"
         "     Lists of topics (strings) that are unique to each respective article. \n\n"
         "     If the topic is not mentioned in the common topics list, it must be mentioned in the corresponding article here. \n\n"
+        "Output must be plain text in the format given below.\n"
         "Output format example:\n"
         '{\n'
         '  "Coverage Differences": [\n'
