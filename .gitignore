@@ -1,2 +1,6 @@
 .qodo
 .venv
+.DS_Store
+__pycache__/
+*.wav
+*.json
