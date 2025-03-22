@@ -19,15 +19,16 @@ from tts import translate_text, hindi_tts
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-
-    nltk_data_dir = os.path.join(os.getcwd(), "nltk_data")
+    nltk_data_dir = "/app/data/nltk_data"
+    # Ensure the directory exists
     os.makedirs(nltk_data_dir, exist_ok=True)
     # Add this directory to nltk's data path
     nltk.data.path.append(nltk_data_dir)
-    # Download the required model to the new directory
-    nltk.download('punkt', quiet=True)
-    nltk.download('averaged_perceptron_tagger', quiet=True)
-    nltk.download('stopwords', quiet=True)
+    # Explicitly specify download location for each resource
+    nltk.download('punkt', download_dir=nltk_data_dir, quiet=True)
+    nltk.download('averaged_perceptron_tagger',
+                  download_dir=nltk_data_dir, quiet=True)
+    nltk.download('stopwords', download_dir=nltk_data_dir, quiet=True)
     nlp_spacy = spacy.load("en_core_web_sm")  # might be optional
 
     app.state.model = create_model("deepseek/deepseek-r1:free")

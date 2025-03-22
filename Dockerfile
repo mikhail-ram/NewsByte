@@ -1,14 +1,26 @@
 FROM python:3.10.16
 
-# Copy the current directory contents into the container at .
+# Create a non-root user to run the application
+RUN useradd -m appuser
+
+# Create directories for data with proper permissions
+RUN mkdir -p /app/data/nltk_data && chown -R appuser:appuser /app
+
+# Set the working directory
+WORKDIR /app
+
+# Copy requirements first for better caching
+COPY requirements.txt .
+RUN pip install --no-cache-dir --upgrade -r requirements.txt
+
+# Copy the application code
 COPY . .
 
-# Set the working directory to /
-WORKDIR /
+# Set proper ownership
+RUN chown -R appuser:appuser /app
 
-# Install requirements.txt 
-RUN pip install --no-cache-dir --upgrade -r /requirements.txt
+# Switch to non-root user
+USER appuser
 
 # Start the FastAPI app on port 7860, the default port expected by Spaces
 CMD ["uvicorn", "api:app", "--host", "0.0.0.0", "--port", "7860"]
-
