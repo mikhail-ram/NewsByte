@@ -1,7 +1,13 @@
 import logging
 import nltk
 import spacy
+import os
 
+nltk_data_dir = os.path.join(os.getcwd(), "nltk_data")
+os.makedirs(nltk_data_dir, exist_ok=True)
+# Add this directory to nltk's data path
+nltk.data.path.append(nltk_data_dir)
+# Download the required model to the new directory
 nltk.download('punkt', quiet=True)
 nltk.download('averaged_perceptron_tagger', quiet=True)
 nltk.download('stopwords', quiet=True)
