@@ -1,3 +1,4 @@
+import spacy
 from typing import Dict, Any
 import asyncio
 from transformers import pipeline
@@ -63,5 +64,6 @@ def run_newsbyte(company: str, num_articles: int = 10) -> Dict[str, Any]:
 
 
 if __name__ == "__main__":
+    print(spacy.__version__)
     company = "Tesla"
     run_newsbyte(company)
