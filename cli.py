@@ -1,3 +1,4 @@
+import argparse
 from typing import Dict, Any
 import asyncio
 from transformers import pipeline
@@ -63,5 +64,12 @@ def run_newsbyte(company: str, num_articles: int = 10) -> Dict[str, Any]:
 
 
 if __name__ == "__main__":
-    company = "Tesla"
-    run_newsbyte(company)
+    parser = argparse.ArgumentParser(
+        description='Run NewsByte analysis on a company.')
+    parser.add_argument('company', type=str,
+                        help='Company name to analyze')
+    parser.add_argument('--num_articles', type=int, default=10,
+                        help='Number of articles to fetch (default: 10)')
+
+    args = parser.parse_args()
+    run_newsbyte(args.company, args.num_articles)
