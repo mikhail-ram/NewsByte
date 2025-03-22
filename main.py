@@ -1,4 +1,4 @@
-from typing import Dict, Any, List
+from typing import Dict, Any
 import asyncio
 from transformers import pipeline
 
