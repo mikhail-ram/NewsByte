@@ -1,4 +1,3 @@
-import time
 from typing import Dict, Any, List
 import asyncio
 from transformers import pipeline
@@ -35,7 +34,7 @@ def run_newsbyte(company: str, num_articles: int = 10) -> Dict[str, Any]:
     comp_score_dict = comp_score.model_dump()
 
     logger.debug("Getting sentiment distribution.")
-    comp_score_dict["Sentiment Distribution"] = get_sentiment_distribution(
+    comp_score_dict["Sentiment_Distribution"] = get_sentiment_distribution(
         articles_with_sentiment)
 
     logger.debug("Extracting final sentiment analysis.")
@@ -54,9 +53,9 @@ def run_newsbyte(company: str, num_articles: int = 10) -> Dict[str, Any]:
     output = {
         "Company": company,
         "Articles": articles_with_sentiment,
-        "Comparative Sentiment Score": comp_score_dict,
-        "Final Sentiment Analysis": final_analysis,
-        "Translated Final Sentiment Analysis": translated_final_analysis,
+        "Comparative_Sentiment_Score": comp_score_dict,
+        "Final_Sentiment_Analysis": final_analysis,
+        "Translated_Final_Sentiment_Analysis": translated_final_analysis,
         "Audio": output_tts_path
     }
     save_news_to_json(company, output)

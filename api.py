@@ -1,33 +1,28 @@
+import uvicorn
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 import asyncio
 from transformers import pipeline
+from contextlib import asynccontextmanager
+import asyncio
+from transformers import pipeline
 
-from main import (
-    create_model,
-    fetch_news_articles,
-    extract_articles_summary,
-    merge_articles,
-    attach_sentiment_to_articles,
-    extract_comparative_sentiment_score,
-    get_sentiment_distribution,
-    extract_final_sentiment_analysis,
-    translate_text,
-    hindi_tts,
-)
-
-app = FastAPI()
+from scraping import fetch_news_articles
+from analysis import attach_sentiment_to_articles, merge_articles, get_sentiment_distribution
+from llm import create_model, extract_articles_summary, extract_comparative_sentiment_score, extract_final_sentiment_analysis
+from tts import translate_text, hindi_tts
 
 # Initialize the model at startup
 
 
-@app.on_event("startup")
-async def startup_event():
+@asynccontextmanager
+async def lifespan(app: FastAPI):
     app.state.model = create_model("deepseek/deepseek-r1:free")
     app.state.sentiment_analyzer = pipeline(
         "sentiment-analysis", model="nlptown/bert-base-multilingual-uncased-sentiment")
+    yield
 
-# Request models for various endpoints
+app = FastAPI(lifespan=lifespan)
 
 
 class CompanyRequest(BaseModel):
@@ -81,7 +76,7 @@ def comparative_sentiment_endpoint(req: ArticlesRequest):
         comp_score = extract_comparative_sentiment_score(
             model, req.articles)
         comp_score_dict = comp_score.model_dump()
-        comp_score_dict["Sentiment Distribution"] = get_sentiment_distribution(
+        comp_score_dict["Sentiment_Distribution"] = get_sentiment_distribution(
             req.articles)
         return comp_score_dict
     except Exception as e:
@@ -98,8 +93,8 @@ def final_analysis_endpoint(req: FinalAnalysisRequest):
         output_tts_path = "hindi_tts.wav"
         hindi_tts(translated_final_analysis, output_tts_path)
         return {
-            "Final Sentiment Analysis": final_analysis,
-            "Translated Final Sentiment Analysis": translated_final_analysis,
+            "Final_Sentiment_Analysis": final_analysis,
+            "Translated_Final_Sentiment_Analysis": translated_final_analysis,
             "Audio": output_tts_path,
         }
     except Exception as e:
@@ -107,5 +102,4 @@ def final_analysis_endpoint(req: FinalAnalysisRequest):
 
 
 if __name__ == "__main__":
-    import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000)

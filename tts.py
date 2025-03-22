@@ -11,11 +11,10 @@ async def translate_text(text: str, src: str = 'auto', dest: str = 'hi') -> str:
 
 
 def hindi_tts(text, output_path):
-    # <= make sure lang_code matches voice
     pipeline = KPipeline(lang_code='h', repo_id='hexgrad/Kokoro-82M')
 
     generator = pipeline(
-        text, voice='hf_alpha',  # <= change voice here
+        text, voice='hf_alpha',
         speed=1, split_pattern=r'\n+'
     )
 

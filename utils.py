@@ -8,7 +8,7 @@ def to_snake_case(text: str) -> str:
 
 
 def save_news_to_json(company: str, final_output: Dict[str, Any]) -> None:
-    filename = f"{to_snake_case(company)}_news.json"
+    filename = f"{to_snake_case(company)}_newsbyte.json"
     try:
         with open(filename, "w", encoding="utf-8") as f:
             json.dump(final_output, f, indent=4, ensure_ascii=False)

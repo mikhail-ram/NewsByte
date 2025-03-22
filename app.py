@@ -3,15 +3,12 @@ from streamlit_extras.tags import tagger_component
 import requests
 import json
 
-# Update this URL to your actual backend base URL
+from utils import to_snake_case
+
 BASE_URL = "http://localhost:8000"
 
 st.title("NewsByte Sentiment Analysis Pipeline")
 
-# ---------------------------
-# Step 1: Fetch Raw Articles
-# ---------------------------
-# Add CSS for justification
 st.markdown(
     """
     <style>
@@ -39,7 +36,6 @@ if st.button("Fetch Raw Articles"):
     response = requests.post(f"{BASE_URL}/fetch_articles", json=payload)
     if response.ok:
         articles = response.json()
-        # Save for later steps
         st.session_state.articles = articles
 
         for idx, article in enumerate(st.session_state.articles, start=1):
@@ -66,9 +62,6 @@ if st.button("Fetch Raw Articles"):
     else:
         st.error("Failed to fetch raw articles.")
 
-# -----------------------------------------
-# Step 2: Generate Summaries and Topics
-# -----------------------------------------
 if "articles" in st.session_state:
     st.header("Step 2: Generate Summaries and Topics")
     if st.button("Summarize Articles"):
@@ -101,9 +94,6 @@ if "articles" in st.session_state:
         else:
             st.error("Failed to generate summaries.")
 
-# -----------------------------------
-# Step 3: Attach Sentiment Analysis
-# -----------------------------------
 if "summarized_articles" in st.session_state:
     st.header("Step 3: Attach Sentiment Analysis")
     if st.button("Analyze Sentiment"):
@@ -145,9 +135,6 @@ if "summarized_articles" in st.session_state:
         else:
             st.error("Failed to analyze sentiment.")
 
-# ---------------------------------------------------------
-# Step 4: Get Comparative Sentiment Score & Distribution
-# ---------------------------------------------------------
 if "articles_with_sentiment" in st.session_state:
     st.header("Step 4: Comparative Sentiment Score")
     if st.button("Get Comparative Sentiment Score"):
@@ -186,30 +173,27 @@ if "articles_with_sentiment" in st.session_state:
                 st.header("Topic Overlap")
                 topic_overlap = st.session_state.comp_sentiment.get(
                     "Topic_Overlap", {})
-                common_topics = topic_overlap.get("Common Topics", [])
+                common_topics = topic_overlap.get("Common_Topics", [])
                 st.markdown(
                     f'<div class="justified-text"><b>Common Topics</b>: {", ".join(common_topics) if common_topics else "None"}</div>',
                     unsafe_allow_html=True
                 )
 
-                # Loop through the unique topic keys:
                 for key in topic_overlap:
-                    if key != "Common Topics":
+                    if key != "Common_Topics":
                         topics = topic_overlap[key]
-                        # Each list of topics is converted to title case and joined by commas.
                         topics_formatted = ", ".join(
                             topic.title() for topic in topics)
                         st.markdown(
-                            f'<div class="justified-text"><b>{key}</b>: {topics_formatted}</div>',
+                            f'<div class="justified-text"><b>{key.replace("_", " ")}</b>: {topics_formatted}</div>',
                             unsafe_allow_html=True
                         )
                 st.write("")
 
-            # --- Sentiment Distribution ---
             with st.container(border=True):
                 st.header("Sentiment Distribution")
                 sentiment_distribution = st.session_state.comp_sentiment.get(
-                    "Sentiment Distribution", {})
+                    "Sentiment_Distribution", {})
 
                 positive_count = sentiment_distribution.get("Positive", 0)
                 negative_count = sentiment_distribution.get("Negative", 0)
@@ -231,9 +215,6 @@ if "articles_with_sentiment" in st.session_state:
         else:
             st.error("Failed to get comparative sentiment score.")
 
-# -----------------------------------------------------
-# Step 5: Final Analysis, Translation, and TTS Output
-# -----------------------------------------------------
 if "comp_sentiment" in st.session_state:
     st.header("Step 5: Final Analysis & TTS")
     if st.button("Get Final Analysis"):
@@ -242,11 +223,10 @@ if "comp_sentiment" in st.session_state:
         response = requests.post(f"{BASE_URL}/final_analysis", json=payload)
         if response.ok:
             final_output = response.json()
-            # Display Sentiment Analysis
             with st.container(border=True):
                 st.header("Final Sentiment Analysis")
                 st.markdown(
-                    f'<div class="justified-text">{final_output["Final Sentiment Analysis"]}</div>',
+                    f'<div class="justified-text">{final_output["Final_Sentiment_Analysis"]}</div>',
                     unsafe_allow_html=True
                 )
                 st.write("")
@@ -254,23 +234,22 @@ if "comp_sentiment" in st.session_state:
             with st.container(border=True):
                 st.header("Translated Final Sentiment Analysis")
                 st.markdown(
-                    f'<div class="justified-text">{final_output["Translated Final Sentiment Analysis"]}</div>',
+                    f'<div class="justified-text">{final_output["Translated_Final_Sentiment_Analysis"]}</div>',
                     unsafe_allow_html=True
                 )
                 st.write("")
-                # Play TTS audio if available
                 audio_path = final_output.get("Audio")
                 if audio_path:
                     st.audio(audio_path)
 
             # Provide a download button for the final output JSON
             output = {"Company": company, "Articles": st.session_state.articles_with_sentiment,
-                      "Comparative Sentiment Score": st.session_state.comp_sentiment, **final_output}
+                      "Comparative_Sentiment_Score": st.session_state.comp_sentiment, **final_output}
             with st.container(border=True):
                 st.header("Complete Output")
                 st.json(output)
                 json_data = json.dumps(output, indent=2, ensure_ascii=False)
                 st.download_button("Download Final Output", data=json_data,
-                                   file_name=f"{company}_newsbyte.json", mime="application/json")
+                                   file_name=f"{to_snake_case(company)}_newsbyte.json", mime="application/json")
         else:
             st.error("Failed to get final analysis.")

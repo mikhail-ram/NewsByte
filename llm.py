@@ -59,13 +59,13 @@ def extract_comparative_sentiment_score(model, articles: List[Dict[str, Any]]) -
     prompt = (
         "Below is a JSON array of articles, each containing a 'title', 'sentiment', 'topics', and 'summary':\n"
         f"{json.dumps(filtered_articles, separators=(',', ':'))}\n\n"
-        "Generate an JSON object with two keys: 'Coverage Differences' and 'Topic Overlap'.\n\n"
-        "The 'Coverage Differences' key should be an array where each element is an object with two keys:\n"
+        "Generate an JSON object with two keys: 'Coverage_Differences' and 'Topic_Overlap'.\n\n"
+        "The 'Coverage_Differences' key should be an array where each element is an object with two keys:\n"
         "  'Comparison': A comparison of two articles based on their contents, referring to the articles by their number (e.g. 'Article 1').\n"
         "  'Impact': An analysis of the impact of the corresponding comparison on an investor.\n\n"
-        f"The 'Topic Overlap' key should be an object with exactly {len(filtered_articles) + 1} keys:\n"
-        "  'Common Topics': A list of common topics (strings) shared across articles.\n"
-        f"  'Unique Topics in Article 1', 'Unique Topics in Article 2', ..., 'Unique Topics in Article {len(filtered_articles)}':\n"
+        f"The 'Topic_Overlap' key should be an object with exactly {len(filtered_articles) + 1} keys:\n"
+        "  'Common_Topics': A list of common topics (strings) shared across articles.\n"
+        f"  'Unique_Topics_in_Article_1', ..., 'Unique_Topics_in_Article_{len(filtered_articles)}':\n"
         "     Lists of topics (strings) that are unique to each respective article. \n\n"
         "     If the topic is not mentioned in the common topics list, it must be mentioned in the corresponding article here. \n\n"
         "Do not provide an empty output.\n"
@@ -73,7 +73,7 @@ def extract_comparative_sentiment_score(model, articles: List[Dict[str, Any]]) -
         "Output must be valid JSON in the format given below.\n"
         "Output format example:\n"
         '{\n'
-        '  "Coverage Differences": [\n'
+        '  "Coverage_Differences": [\n'
         "    {\n"
         '      "Comparison": "Article 1 highlights Tesla\'s strong sales, while Article 2 discusses regulatory issues.",\n'
         '      "Impact": "The first article boosts confidence in Tesla\'s market growth, while the second raises concerns about future regulatory hurdles."\n'
@@ -83,10 +83,10 @@ def extract_comparative_sentiment_score(model, articles: List[Dict[str, Any]]) -
         '      "Impact": "Investors may react positively to growth news but stay cautious due to regulatory scrutiny."\n'
         "    }\n"
         "  ],\n"
-        '  "Topic Overlap": {\n'
-        '    "Common Topics": ["Electric Vehicles"],\n'
-        '    "Unique Topics in Article 1": ["Stock Market", "Innovation"],\n'
-        '    "Unique Topics in Article 2": ["Regulations", "Autonomous Vehicles"]\n'
+        '  "Topic_Overlap": {\n'
+        '    "Common_Topics": ["Electric Vehicles"],\n'
+        '    "Unique_Topics_in_Article_1": ["Stock Market", "Innovation"],\n'
+        '    "Unique_Topics_in_Article_2": ["Regulations", "Autonomous Vehicles"]\n'
         "  }\n"
         "}"
     )
@@ -98,9 +98,9 @@ def extract_comparative_sentiment_score(model, articles: List[Dict[str, Any]]) -
 def extract_final_sentiment_analysis(model, company: str, comparative_score: Dict[str, Any]) -> str:
     prompt = (
         f"Below is a JSON object of comparative sentiment scores for the {company} company.\n"
-        "The object contains a 'Sentiment Distribution' which is a summary statistic of the sentiment ('Positive', 'Neutral', 'Negative' or 'Unknown') about the top news about the company.\n"
-        "The 'Coverage Differences' is a list of JSON objects which analyzes the differences in news coverage. Each object here has a 'Comparison' key and an 'Impact' key.\n"
-        "Finally, the object contains a 'Topic Overlap' key that includes a list of 'Common Topics' across articles and lists of topics unique to each article ('Unique Topics in Article n').\n"
+        "The object contains a 'Sentiment_Distribution' which is a summary statistic of the sentiment ('Positive', 'Neutral', 'Negative' or 'Unknown') about the top news about the company.\n"
+        "The 'Coverage_Differences' is a list of JSON objects which analyzes the differences in news coverage. Each object here has a 'Comparison' key and an 'Impact' key.\n"
+        "Finally, the object contains a 'Topic_Overlap' key that includes a list of 'Common_Topics' across articles and lists of topics unique to each article ('Unique_Topics_in_Article_n').\n"
         "Based on this information, can you provide a concise final sentiment analysis for an investor for the company that is justified. The analysis should not be longer than 4 sentences.\n"
         "Write short sentences. Each sentence should appear on a new line, and the full stop at the end of a sentence should be immediately followed by a line break (i.e., no space after the full stop).\n"
         "Use plain text.\n"
