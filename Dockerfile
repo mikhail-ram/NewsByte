@@ -23,4 +23,4 @@ RUN chown -R appuser:appuser /app
 USER appuser
 
 # Start the FastAPI app on port 7860, the default port expected by Spaces
-CMD ["uvicorn", "api:app", "--host", "0.0.0.0", "--port", "7860"]
+CMD ["sh", "-c", "uvicorn api:app --host 0.0.0.0 --port 8000 & streamlit run app.py --server.port 7860 --server.address 0.0.0.0"]
