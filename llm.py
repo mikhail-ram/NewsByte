@@ -41,6 +41,7 @@ def extract_articles_summary(model, articles: List[Dict[str, Any]]) -> List[Dict
         "'summary' must be a concise summary of the article's 'text' (maximum 3 sentences). "
         "Ensure the output array has exactly the same number of elements as the input array. "
         "Do not provide an explanation like 'Here is the output...', provide only the valid JSON output without triple backticks in the format given below. "
+        "DO NOT USE TRIPLE BACKTICKS TO FORMAT THE OUTPUT.\n"
         "Output format example:\n"
         '[ { "topics": ["keyword1", "keyword2", "keyword3"], "summary": "Short summary here." }, '
         '{ "topics": ["keywordA", "keywordB", "keywordC"], "summary": "Another summary here." } ]'
@@ -68,6 +69,7 @@ def extract_comparative_sentiment_score(model, articles: List[Dict[str, Any]]) -
         f"  'Unique_Topics_in_Article_1', ..., 'Unique_Topics_in_Article_{len(filtered_articles)}':\n"
         "     Lists of topics (strings) that are unique to each respective article from the given 'topics' key for that article but not in the 'Common_Topics' key. \n\n"
         "Do not provide an explanation like 'Here is the output...', provide only the valid JSON output without triple backticks in the format given below. "
+        "DO NOT USE TRIPLE BACKTICKS TO FORMAT THE OUTPUT.\n"
         "Output format example:\n"
         '{\n'
         '  "Coverage_Differences": [\n'
