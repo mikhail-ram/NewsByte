@@ -42,13 +42,10 @@ def retry_prompt(generator_func, prompt: str, retries: int = 3):
                             try:
                                 # Parse manually to check if it's valid JSON
                                 parsed_json = json_repair.loads(cleaned_text)
-
-                                # If we got here, the JSON is valid
                                 return generator_func.schema_type.model_validate(parsed_json)
-                            except (json.JSONDecodeError, AttributeError):
-                                # If cleaning didn't work, just continue to the next retry
+                            except Exception as e:
                                 logger.error(
-                                    f"Failed to parse cleaned JSON:\n{cleaned_text}")
+                                    f"Failed to parse cleaned JSON:\n{cleaned_text}\nGetting error:\n{e}")
 
                         break  # Only process the first error
         except Exception as e:
