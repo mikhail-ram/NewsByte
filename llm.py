@@ -1,3 +1,4 @@
+from pydantic import ValidationError
 import os
 import json
 from typing import List, Dict, Any
@@ -12,12 +13,59 @@ from config import logger
 
 def retry_prompt(generator_func, prompt: str, retries: int = 3):
     last_exception = None
+
     for attempt in range(retries):
         try:
             return generator_func(prompt)
+        except ValidationError as e:
+            last_exception = e
+            logger.error(f"Attempt {attempt + 1} failed with error: {e}")
+
+            # Check if the error is related to JSONDecodeError
+            errors = e.errors()
+            is_json_decode_error = any(
+                error.get('type') == 'value_error.jsondecode' for error in errors
+            )
+
+            if is_json_decode_error:
+                # Get the input value from the first error with this type
+                for error in errors:
+                    if error.get('type') == 'value_error.jsondecode':
+                        raw_text = error.get('input')
+
+                        # If raw_text is found and contains backticks
+                        if raw_text and "```" in raw_text:
+                            # Clean the JSON text by removing markdown code formatting
+                            cleaned_text = raw_text
+
+                            # Remove everything before the first { and after the last }
+                            start_idx = cleaned_text.find('{')
+                            end_idx = cleaned_text.rfind('}') + 1
+
+                            if start_idx >= 0 and end_idx > start_idx:
+                                cleaned_text = cleaned_text[start_idx:end_idx]
+                            else:
+                                # If no JSON object found, just remove the backticks
+                                cleaned_text = cleaned_text.replace(
+                                    "```json", "").replace("```", "").strip()
+
+                            # Try to directly parse the cleaned JSON
+                            try:
+                                # Parse manually to check if it's valid JSON
+                                parsed_json = json.loads(cleaned_text)
+
+                                # If we got here, the JSON is valid
+                                return generator_func.schema_type.model_validate(parsed_json)
+                            except (json.JSONDecodeError, AttributeError):
+                                # If cleaning didn't work, just continue to the next retry
+                                logger.error(
+                                    f"Failed to parse cleaned JSON: {cleaned_text[:100]}...")
+
+                        break  # Only process the first error
         except Exception as e:
             last_exception = e
             logger.error(f"Attempt {attempt + 1} failed with error: {e}")
+
     raise Exception(
         f"LLM prompt failed after {retries} attempts. Last error: {last_exception}")
 
