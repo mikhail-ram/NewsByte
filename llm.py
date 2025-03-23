@@ -33,6 +33,7 @@ def create_model(model_name: str):
 
 def extract_articles_summary(model, articles: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
     prompt = (
+        "You are an article summarizer tasked with extracting topics and summaries out of articles given to you. You cannot output triple backticks (```) and you can only output pure JSON.\n"
         "Below is a JSON array of articles, each containing a 'title' and 'text':\n"
         f"{json.dumps(articles, separators=(',', ':'))}\n\n"
         "Generate an array where each element has two keys: "
@@ -40,8 +41,7 @@ def extract_articles_summary(model, articles: List[Dict[str, Any]]) -> List[Dict
         "'topics' must be an array of exactly 3 relevant keywords, no more, no less, extracted from the article's 'text'. "
         "'summary' must be a concise summary of the article's 'text' (maximum 3 sentences). "
         "Ensure the output array has exactly the same number of elements as the input array. "
-        "Do not provide an explanation like 'Here is the output...', provide only the valid JSON output without triple backticks in the format given below. "
-        "ONLY USE PURE JSON, NO TRIPLE BACKTICKS.\n"
+        "Provide only the valid JSON output in the format given below. "
         "Output format example:\n"
         '[ { "topics": ["keyword1", "keyword2", "keyword3"], "summary": "Short summary here." }, '
         '{ "topics": ["keywordA", "keywordB", "keywordC"], "summary": "Another summary here." } ]'
@@ -58,6 +58,7 @@ def extract_comparative_sentiment_score(model, articles: List[Dict[str, Any]]) -
         for article in articles
     ]
     prompt = (
+        "You are an article analyzer tasked with creating a comparative analysis out of articles given to you. You cannot output triple backticks (```) and you can only output pure JSON.\n"
         "Below is a JSON array of articles, each containing a 'title', 'sentiment', 'topics', and 'summary':\n"
         f"{json.dumps(filtered_articles, separators=(',', ':'))}\n\n"
         "Generate an JSON object with two keys: 'Coverage_Differences' and 'Topic_Overlap'.\n\n"
@@ -68,8 +69,7 @@ def extract_comparative_sentiment_score(model, articles: List[Dict[str, Any]]) -
         "  'Common_Topics': A list of common topics (strings) shared across articles.\n"
         f"  'Unique_Topics_in_Article_1', ..., 'Unique_Topics_in_Article_{len(filtered_articles)}':\n"
         "     Lists of topics (strings) that are unique to each respective article from the given 'topics' key for that article but not in the 'Common_Topics' key. \n\n"
-        "Do not provide an explanation like 'Here is the output...', provide only the valid JSON output WITHOUT triple backticks in the format given below. "
-        "ONLY USE PURE JSON, NO TRIPLE BACKTICKS.\n"
+        "Provide only the valid JSON output in the format given below. "
         "Output format example:\n"
         '{\n'
         '  "Coverage_Differences": [\n'
