@@ -32,7 +32,7 @@ async def lifespan(app: FastAPI):
     nlp_spacy = spacy.load("en_core_web_sm")  # might be optional
 
     app.state.model = create_model(
-        "openai/gpt-3.5-turbo-0125")  # deepseek/deepseek-r1:free, meta-llama/llama-3.2-3b-instruct: free
+        "meta-llama/llama-3.2-3b-instruct:free")  # deepseek/deepseek-r1:free, meta-llama/llama-3.2-3b-instruct: free
     app.state.sentiment_analyzer = pipeline(
         "sentiment-analysis", model="nlptown/bert-base-multilingual-uncased-sentiment")
     yield
