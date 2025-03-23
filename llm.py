@@ -1,6 +1,7 @@
 from pydantic import ValidationError
 import os
 import json
+import json_repair
 from typing import List, Dict, Any
 
 from outlines import models, generate
@@ -52,7 +53,7 @@ def retry_prompt(generator_func, prompt: str, retries: int = 3):
                             # Try to directly parse the cleaned JSON
                             try:
                                 # Parse manually to check if it's valid JSON
-                                parsed_json = json.loads(cleaned_text)
+                                parsed_json = json_repair.loads(cleaned_text)
 
                                 # If we got here, the JSON is valid
                                 return generator_func.schema_type.model_validate(parsed_json)
