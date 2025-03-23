@@ -33,7 +33,7 @@ def create_model(model_name: str):
 
 def extract_articles_summary(model, articles: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
     prompt = (
-        "You are an article summarizer tasked with extracting topics and summaries out of articles given to you. You cannot output triple backticks (```) and you can only output pure, valid JSON.\n"
+        "You are an article summarizer tasked with extracting topics and summaries out of articles given to you. You cannot output triple backticks (```) and you can only output pure JSON.\n"
         "Below is a JSON array of articles, each containing a 'title' and 'text':\n"
         f"{json.dumps(articles, separators=(',', ':'))}\n\n"
         "Generate an array where each element has two keys: "
@@ -58,7 +58,7 @@ def extract_comparative_sentiment_score(model, articles: List[Dict[str, Any]]) -
         for article in articles
     ]
     prompt = (
-        "You are an article analyzer tasked with creating a comparative analysis out of articles given to you. You cannot output triple backticks (```) and you can only output pure, valid JSON.\n"
+        "You are an article analyzer tasked with creating a comparative analysis out of articles given to you. You cannot output triple backticks (```) and you only output pure JSON.\n"
         "Below is a JSON array of articles, each containing a 'title', 'sentiment', 'topics', and 'summary':\n"
         f"{json.dumps(filtered_articles, separators=(',', ':'))}\n\n"
         "Generate an JSON object with two keys: 'Coverage_Differences' and 'Topic_Overlap'.\n\n"
