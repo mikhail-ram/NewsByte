@@ -67,7 +67,7 @@ def extract_comparative_sentiment_score(model, articles: List[Dict[str, Any]]) -
         f"The 'Topic_Overlap' key should be an object with {len(filtered_articles) + 1} keys:\n"
         "  'Common_Topics': A list of common topics (strings) shared across articles.\n"
         f"  'Unique_Topics_in_Article_1', ..., 'Unique_Topics_in_Article_{len(filtered_articles)}':\n"
-        "     Lists of topics (strings) that are unique to each respective article. \n\n"
+        "     Lists of topics (strings) that are unique to each respective article from the given 'topics' key for that article but not in the 'Common_Topics' key. \n\n"
         "Output must be valid JSON without triple backticks in the format given below.\n"
         "Output format example:\n"
         '{\n'
