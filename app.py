@@ -3,7 +3,7 @@ from streamlit_extras.tags import tagger_component
 import requests
 import json
 
-from utils import to_snake_case
+from utils import to_snake_case, to_title_case
 
 BASE_URL = "http://localhost:8000"
 
@@ -84,7 +84,8 @@ if "articles" in st.session_state:
 
                     topics = article.get("topics", "Unknown")
                     if isinstance(topics, list):
-                        topics = ", ".join(topic.title() for topic in topics)
+                        topics = ", ".join(to_title_case(topic)
+                                           for topic in topics)
                     st.caption(f"{topics}")
                     st.markdown(
                         f'<div class="justified-text">{article.get("summary", "No summary provided.")}</div>',
@@ -124,7 +125,8 @@ if "summarized_articles" in st.session_state:
 
                     topics = article.get("topics", "Unknown")
                     if isinstance(topics, list):
-                        topics = ", ".join(topic.title() for topic in topics)
+                        topics = ", ".join(to_title_case(topic)
+                                           for topic in topics)
                     st.caption(f"{topics}")
 
                     st.markdown(
@@ -183,7 +185,7 @@ if "articles_with_sentiment" in st.session_state:
                     if key != "Common_Topics":
                         topics = topic_overlap[key]
                         topics_formatted = ", ".join(
-                            topic.title() for topic in topics)
+                            to_title_case(topic) for topic in topics)
                         st.markdown(
                             f'<div class="justified-text"><b>{key.replace("_", " ")}</b>: {topics_formatted}</div>',
                             unsafe_allow_html=True

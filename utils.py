@@ -7,6 +7,10 @@ def to_snake_case(text: str) -> str:
     return text.lower().replace(" ", "_")
 
 
+def to_title_case(text: str) -> str:
+    return " ".join(w.capitalize() if w[0].islower() else w for w in text.split())
+
+
 def save_news_to_json(company: str, final_output: Dict[str, Any]) -> None:
     filename = f"{to_snake_case(company)}_newsbyte.json"
     try:
