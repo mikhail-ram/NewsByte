@@ -37,20 +37,8 @@ def retry_prompt(generator_func, prompt: str, retries: int = 3):
                         # If raw_text is found and contains backticks
                         if raw_text and "```" in raw_text:
                             # Clean the JSON text by removing markdown code formatting
-                            cleaned_text = raw_text
-
-                            # Remove everything before the first { and after the last }
-                            start_idx = cleaned_text.find('{')
-                            end_idx = cleaned_text.rfind('}') + 1
-
-                            if start_idx >= 0 and end_idx > start_idx:
-                                cleaned_text = cleaned_text[start_idx:end_idx]
-                            else:
-                                # If no JSON object found, just remove the backticks
-                                cleaned_text = cleaned_text.replace(
-                                    "```json", "").replace("```", "").strip()
-
-                            # Try to directly parse the cleaned JSON
+                            cleaned_text = raw_text.replace(
+                                "```json", "").replace("```", "").strip()
                             try:
                                 # Parse manually to check if it's valid JSON
                                 parsed_json = json_repair.loads(cleaned_text)
@@ -60,7 +48,7 @@ def retry_prompt(generator_func, prompt: str, retries: int = 3):
                             except (json.JSONDecodeError, AttributeError):
                                 # If cleaning didn't work, just continue to the next retry
                                 logger.error(
-                                    f"Failed to parse cleaned JSON: {cleaned_text[:100]}...")
+                                    f"Failed to parse cleaned JSON:\n{cleaned_text}")
 
                         break  # Only process the first error
         except Exception as e:
