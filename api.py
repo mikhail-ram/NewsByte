@@ -31,7 +31,8 @@ async def lifespan(app: FastAPI):
     nltk.download('stopwords', download_dir=nltk_data_dir, quiet=True)
     nlp_spacy = spacy.load("en_core_web_sm")  # might be optional
 
-    app.state.model = create_model("deepseek/deepseek-r1:free")
+    app.state.model = create_model(
+        "meta-llama/llama-3.2-3b-instruct: free")  # deepseek/deepseek-r1:free
     app.state.sentiment_analyzer = pipeline(
         "sentiment-analysis", model="nlptown/bert-base-multilingual-uncased-sentiment")
     yield
