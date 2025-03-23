@@ -12,7 +12,7 @@ from data_models import ArticlesList, ComparativeSentimentScore
 from config import logger
 
 
-def retry_prompt(generator_func, prompt: str, retries: int = 3):
+def retry_prompt(generator_func, prompt: str, schema_type=None, retries: int = 3):
     last_exception = None
 
     for attempt in range(retries):
@@ -42,7 +42,10 @@ def retry_prompt(generator_func, prompt: str, retries: int = 3):
                             try:
                                 # Parse manually to check if it's valid JSON
                                 parsed_json = json_repair.loads(cleaned_text)
-                                return generator_func.schema_type.model_validate(parsed_json)
+                                if schema_type:
+                                    return schema_type.model_validate(parsed_json)
+                                else:
+                                    return parsed_json
                             except Exception as e:
                                 logger.error(
                                     f"Failed to parse cleaned JSON:\n{cleaned_text}\nGetting error:\n{e}")
@@ -82,7 +85,7 @@ def extract_articles_summary(model, articles: List[Dict[str, Any]]) -> List[Dict
         '{ "topics": ["keywordA", "keywordB", "keywordC"], "summary": "Another summary here." } ]'
     )
     generator = generate.json(model, ArticlesList)
-    result = retry_prompt(generator, prompt, 3)
+    result = retry_prompt(generator, prompt, ArticlesList, 3)
     return [article_summary.model_dump() for article_summary in result.root]
 
 
@@ -126,7 +129,7 @@ def extract_comparative_sentiment_score(model, articles: List[Dict[str, Any]]) -
         "}"
     )
     generator = generate.json(model, ComparativeSentimentScore)
-    result = retry_prompt(generator, prompt, 3)
+    result = retry_prompt(generator, prompt, ComparativeSentimentScore, 3)
     return result
 
 
