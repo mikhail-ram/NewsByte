@@ -226,16 +226,16 @@ if st.button("Get Final Analysis"):
         "comp_score_dict": st.session_state.comp_sentiment, "company": company}
     response = requests.post(f"{BASE_URL}/final_analysis", json=payload)
     if response.ok:
-        final_output = response.json()
-        st.session_state.final_output = final_output
+        analysis = response.json()
+        st.session_state.analysis = analysis
     else:
         st.error("Failed to get final analysis.")
 
-if "final_output" in st.session_state:
+if "analysis" in st.session_state:
     with st.container(border=True):
         st.header("Final Sentiment Analysis")
         st.markdown(
-            f'<div class="justified-text">{final_output["Final_Sentiment_Analysis"]}</div>',
+            f'<div class="justified-text">{st.session_state.analysis["Final_Sentiment_Analysis"]}</div>',
             unsafe_allow_html=True
         )
         st.write("")
@@ -243,20 +243,23 @@ if "final_output" in st.session_state:
     with st.container(border=True):
         st.header("Translated Final Sentiment Analysis")
         st.markdown(
-            f'<div class="justified-text">{final_output["Translated_Final_Sentiment_Analysis"]}</div>',
+            f'<div class="justified-text">{st.session_state.analysis["Translated_Final_Sentiment_Analysis"]}</div>',
             unsafe_allow_html=True
         )
         st.write("")
-        audio_path = final_output.get("Audio")
+        audio_path = st.session_state.analysis.get("Audio")
         if audio_path:
             st.audio(audio_path)
 
     # Provide a download button for the final output JSON
-    output = {"Company": company, "Articles": st.session_state.articles_with_sentiment,
-              "Comparative_Sentiment_Score": st.session_state.comp_sentiment, **final_output}
+    st.session_state.output = {"Company": company, "Articles": st.session_state.articles_with_sentiment,
+                               "Comparative_Sentiment_Score": st.session_state.comp_sentiment, **st.session_state.analysis}
+
+if "output" in st.session_state:
     with st.container(border=True):
         st.header("Complete Output")
-        st.json(output)
-        json_data = json.dumps(output, indent=2, ensure_ascii=False)
+        st.json(st.session_state.output)
+        json_data = json.dumps(st.session_state.output,
+                               indent=2, ensure_ascii=False)
         st.download_button("Download Final Output", data=json_data,
                            file_name=f"{to_snake_case(company)}_newsbyte.json", mime="application/json")
