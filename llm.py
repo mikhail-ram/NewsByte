@@ -96,14 +96,12 @@ def extract_comparative_sentiment_score(model, articles: List[Dict[str, Any]]) -
 
 def extract_final_sentiment_analysis(model, company: str, comparative_score: Dict[str, Any]) -> str:
     prompt = (
+        f"You are a market analyst tasked with generating a summarized company analysis for investors out of a comparative analysis for the {company} company given to you by your team. You can only write short sentences with each sentence appearing on a new line.\n"
         f"Below is a JSON object of comparative sentiment scores for the {company} company.\n"
         "The object contains a 'Sentiment_Distribution' which is a summary statistic of the sentiment ('Positive', 'Neutral', 'Negative' or 'Unknown') about the top news about the company.\n"
         "The 'Coverage_Differences' is a list of JSON objects which analyzes the differences in news coverage. Each object here has a 'Comparison' key and an 'Impact' key.\n"
         "Finally, the object contains a 'Topic_Overlap' key that includes a list of 'Common_Topics' across articles and lists of topics unique to each article ('Unique_Topics_in_Article_n').\n"
         "Based on this information, can you provide a concise final sentiment analysis for an investor for the company that is justified. The analysis should not be longer than 4 sentences.\n"
-        "Write short sentences. Each sentence should appear on a new line, and the full stop at the end of a sentence should be immediately followed by a line break (i.e., no space after the full stop).\n"
-        "Do not provide an explanation like 'Here is the output...', provide only the required sentiment analysis. "
-        "Use plain text.\n"
         "Here are the comparative sentiment scores:\n\n"
         f"{json.dumps(comparative_score, separators=(',', ':'))}\n\n"
     )
