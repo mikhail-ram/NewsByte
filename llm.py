@@ -64,11 +64,10 @@ def extract_comparative_sentiment_score(model, articles: List[Dict[str, Any]]) -
         "The 'Coverage_Differences' key should be an array where each element is an object with two keys:\n"
         "  'Comparison': A comparison of two articles based on their contents, referring to the articles by their number (e.g. 'Article 1').\n"
         "  'Impact': An analysis of the impact of the corresponding comparison on an investor.\n\n"
-        f"The 'Topic_Overlap' key should be an object with exactly {len(filtered_articles) + 1} keys:\n"
+        f"The 'Topic_Overlap' key should be an object with {len(filtered_articles) + 1} keys:\n"
         "  'Common_Topics': A list of common topics (strings) shared across articles.\n"
         f"  'Unique_Topics_in_Article_1', ..., 'Unique_Topics_in_Article_{len(filtered_articles)}':\n"
         "     Lists of topics (strings) that are unique to each respective article. \n\n"
-        "     If the topic is not mentioned in the common topics list, it must be mentioned in the corresponding article here. \n\n"
         "Output must be valid JSON without triple backticks in the format given below.\n"
         "Output format example:\n"
         '{\n'

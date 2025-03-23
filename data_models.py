@@ -21,8 +21,8 @@ class TopicOverlap(BaseModel):
 
     class Config:
         extra = "allow"
-        populate_by_name = True
 
+    '''
     @model_validator(mode="before")
     def validate_exact_keys_and_types(cls, data: Dict[str, Any]) -> Dict[str, Any]:
         if "Common_Topics" not in data:
@@ -48,6 +48,7 @@ class TopicOverlap(BaseModel):
                 raise ValueError(
                     f"Value for '{key}' must be a list of strings.")
         return data
+    '''
 
 
 class ComparativeSentimentScore(BaseModel):
