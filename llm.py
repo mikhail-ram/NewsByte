@@ -33,7 +33,7 @@ def create_model(model_name: str):
 
 def extract_articles_summary(model, articles: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
     prompt = (
-        "You are an article summarizer tasked with extracting topics and summaries out of articles given to you. You cannot output triple backticks (```) and you can only output pure JSON.\n"
+        "You are an article summarizer tasked with extracting topics and summaries out of articles given to you.\n"
         "Below is a JSON array of articles, each containing a 'title' and 'text':\n"
         f"{json.dumps(articles, separators=(',', ':'))}\n\n"
         "Generate an array where each element has two keys: "
@@ -41,7 +41,7 @@ def extract_articles_summary(model, articles: List[Dict[str, Any]]) -> List[Dict
         "'topics' must be an array of exactly 3 relevant keywords, no more, no less, extracted from the article's 'text'. "
         "'summary' must be a concise summary of the article's 'text' (maximum 3 sentences). "
         "Ensure the output array has exactly the same number of elements as the input array. "
-        "Provide only the valid JSON output in the format given below. "
+        "Provide only the valid JSON output with no backticks in the format given below. "
         "Output format example:\n"
         '[ { "topics": ["keyword1", "keyword2", "keyword3"], "summary": "Short summary here." }, '
         '{ "topics": ["keywordA", "keywordB", "keywordC"], "summary": "Another summary here." } ]'
