@@ -2,24 +2,25 @@ import soundfile as sf
 import numpy as np
 from kokoro import KPipeline
 from googletrans import Translator
+from config import logger
 
 
 async def translate_text(text: str, src: str = 'auto', dest: str = 'hi') -> str:
     async with Translator() as translator:
+        logger.debug("Translating text to Hindi.")
         result = await translator.translate(text, src=src, dest=dest)
         return result.text
 
 
 def hindi_tts(text, output_path):
     pipeline = KPipeline(lang_code='h', repo_id='hexgrad/Kokoro-82M')
-
+    logger.debug("Running Hindi TTS.")
     generator = pipeline(
         text, voice='hf_alpha',
         speed=1, split_pattern=r'\n+'
     )
 
     audio_segments = []
-
     for i, (_, _, audio) in enumerate(generator):
         arr = audio.cpu().numpy() if hasattr(audio, "cpu") else audio.numpy()
         audio_segments.append(arr)
