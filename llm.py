@@ -40,8 +40,7 @@ def extract_articles_summary(model, articles: List[Dict[str, Any]]) -> List[Dict
         "'topics' must be an array of exactly 3 relevant keywords, no more, no less, extracted from the article's 'text'. "
         "'summary' must be a concise summary of the article's 'text' (maximum 3 sentences). "
         "Ensure the output array has exactly the same number of elements as the input array. "
-        "Do not include any triple backticks or markdown formatting in your output; output pure JSON only without triple backticks or markdown. "
-        "Output must be valid JSON in the format given below. "
+        "Provide only valid JSON output without triple backticks in the format given below. "
         "Output format example:\n"
         '[ { "topics": ["keyword1", "keyword2", "keyword3"], "summary": "Short summary here." }, '
         '{ "topics": ["keywordA", "keywordB", "keywordC"], "summary": "Another summary here." } ]'
