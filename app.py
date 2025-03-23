@@ -7,8 +7,6 @@ from utils import to_snake_case, to_title_case
 
 BASE_URL = "http://localhost:8000"
 
-st.title("NewsByte Sentiment Analysis Pipeline")
-
 st.markdown(
     """
     <style>
@@ -27,6 +25,12 @@ st.markdown(
     """,
     unsafe_allow_html=True
 )
+st.title("NewsByte")
+st.markdown(
+    f'<div class="justified-text">NewsByte is a web app that fetches news about a company, summarizes articles, analyzes sentiment, compares trends, and generates a Hindi audio summary. Built with Python, FastAPI, and Streamlit.</div>',
+    unsafe_allow_html=True
+)
+st.write("")
 
 st.header("Step 1: Fetch Raw Articles")
 company = st.text_input("Enter Company Name")
@@ -75,7 +79,6 @@ if st.button("Summarize Articles"):
         st.error("Failed to generate summaries.")
 
 if "summarized_articles" in st.session_state:
-    st.write("Articles with Summaries and Topics:")
     for idx, article in enumerate(st.session_state.summarized_articles, start=1):
         with st.container(border=True):
             title = article.get("title", "No Title")
@@ -107,7 +110,6 @@ if st.button("Analyze Sentiment"):
         st.error("Failed to analyze sentiment.")
 
 if "articles_with_sentiment" in st.session_state:
-    st.write("Articles with Sentiment:")
     for idx, article in enumerate(st.session_state.articles_with_sentiment, start=1):
         with st.container(border=True):
             title = article.get("title", "No Title")
