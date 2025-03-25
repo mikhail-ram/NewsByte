@@ -3,54 +3,61 @@ from pydantic import BaseModel, conlist, RootModel, Field, model_validator
 
 
 class ArticleSummary(BaseModel):
+    """
+    Model representing a summary of an article.
+
+    Attributes:
+        topics (conlist[str, min_length=3, max_length=3]): A list of exactly three topics related to the article.
+        summary (str): A summary text for the article.
+    """
     topics: conlist(str, min_length=3, max_length=3)
     summary: str
 
 
 class ArticlesList(RootModel[conlist(ArticleSummary, min_length=1)]):
+    """
+    Root model representing a list of article summaries.
+
+    Ensures that the list contains at least one ArticleSummary.
+    """
     pass
 
 
 class CoverageDifference(BaseModel):
+    """
+    Model representing a difference in coverage between articles.
+
+    Attributes:
+        Comparison (str): The comparison description between different articles.
+        Impact (str): The impact description of the coverage difference.
+    """
     Comparison: str
     Impact: str
 
 
 class TopicOverlap(BaseModel):
+    """
+    Model representing the overlap in topics across articles.
+
+    Attributes:
+        Common_Topics (List[str]): A list of topics that are common across the articles.
+
+    Note:
+        Additional fields are allowed as extra information.
+    """
     Common_Topics: List[str]
 
     class Config:
         extra = "allow"
 
-    '''
-    @model_validator(mode="before")
-    def validate_exact_keys_and_types(cls, data: Dict[str, Any]) -> Dict[str, Any]:
-        if "Common_Topics" not in data:
-            raise ValueError("Missing required key 'Common_Topics'.")
-        common_val = data["Common_Topics"]
-        if not isinstance(common_val, list) or not all(isinstance(x, str) for x in common_val):
-            raise ValueError("'Common_Topics' must be a list of strings.")
-        unique_keys = [k for k in data if k != "Common_Topics"]
-        if not unique_keys:
-            raise ValueError(
-                "There must be at least one unique topics key besides 'Common_Topics'.")
-        expected_keys = [f"Unique_Topics_in_Article_{i}" for i in range(
-            1, len(unique_keys) + 1)]
-        if sorted(unique_keys) != sorted(expected_keys):
-            raise ValueError(
-                f"Unique topics keys must be exactly {expected_keys}. Got: {sorted(unique_keys)}")
-        if len(data) != len(unique_keys) + 1:
-            raise ValueError(
-                "There must be exactly n + 1 keys (1 'Common_Topics' key and n unique keys).")
-        for key in unique_keys:
-            val = data[key]
-            if not isinstance(val, list) or not all(isinstance(item, str) for item in val):
-                raise ValueError(
-                    f"Value for '{key}' must be a list of strings.")
-        return data
-    '''
-
 
 class ComparativeSentimentScore(BaseModel):
+    """
+    Model representing the comparative sentiment score of a set of articles.
+
+    Attributes:
+        Coverage_Differences (List[CoverageDifference]): A list of coverage differences with their respective comparisons and impacts.
+        Topic_Overlap (TopicOverlap): An object detailing the overlapping topics among the articles.
+    """
     Coverage_Differences: List[CoverageDifference]
     Topic_Overlap: TopicOverlap

@@ -1,3 +1,10 @@
+"""
+Module for setting up logging configuration for NewsByte.
+
+This module initializes a logger with the name "NewsByte" and configures it to output log messages
+to the console. It sets up a stream handler with a specific log message format and adjusts the log level
+based on the DEBUG_MODE flag.
+"""
 import logging
 
 logger = logging.getLogger("NewsByte")

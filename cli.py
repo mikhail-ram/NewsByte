@@ -12,6 +12,27 @@ from tts import translate_text, hindi_tts
 
 
 def run_newsbyte(company: str, num_articles: int = 10) -> Dict[str, Any]:
+    """
+    Run the complete NewsByte analysis workflow for a given company.
+
+    This function performs the following steps:
+      - Creates the language model and sentiment analyzer.
+      - Fetches news articles for the specified company.
+      - Extracts topics and summaries using the language model.
+      - Merges the original articles with their summaries.
+      - Attaches sentiment analysis to each article.
+      - Computes a comparative sentiment score and its distribution.
+      - Generates a final sentiment analysis and translates it.
+      - Converts the translated analysis to audio using TTS.
+      - Saves the output to a JSON file.
+
+    Parameters:
+        company (str): The company name to analyze.
+        num_articles (int): The number of articles to fetch (default is 10).
+
+    Returns:
+        Dict[str, Any]: A dictionary containing the complete analysis output.
+    """
     model = create_model("deepseek/deepseek-r1:free")
     sentiment_analyzer = pipeline(
         "sentiment-analysis", model="nlptown/bert-base-multilingual-uncased-sentiment")
