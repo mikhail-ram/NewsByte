@@ -13,26 +13,6 @@ from config import logger
 
 
 def retry_prompt(generator_func, prompt: str, schema_type=None, retries: int = 3):
-    """
-    Retry calling the generator function with the provided prompt until a valid output is obtained or retries are exhausted.
-
-    This function attempts to call the generator_func with the given prompt. If a ValidationError occurs,
-    it checks if the error is related to a JSON decode issue and attempts to repair the JSON output. If any other 
-    exception occurs, it logs the error. After the specified number of retries, it raises an exception with the 
-    last encountered error.
-
-    Parameters:
-        generator_func: A function that takes a prompt and returns generated output.
-        prompt (str): The prompt string to send to the generator.
-        schema_type: An optional Pydantic schema to validate the output.
-        retries (int): The maximum number of retry attempts (default is 3).
-
-    Returns:
-        The validated output from the generator function, either as a parsed JSON or as an instance of schema_type.
-
-    Raises:
-        Exception: If the generator function fails after the specified number of retries.
-    """
     last_exception = None
 
     for attempt in range(retries):
@@ -80,15 +60,6 @@ def retry_prompt(generator_func, prompt: str, schema_type=None, retries: int = 3
 
 
 def create_model(model_name: str):
-    """
-    Creates an OpenAI model client.
-
-    Args:
-        model_name (str): The name of the model to use.
-
-    Returns:
-        The initialized OpenAI model client.
-    """
     client = AsyncOpenAI(
         api_key=os.environ.get("NEWSBYTE_API_KEY"),
         base_url="https://openrouter.ai/api/v1"
@@ -98,16 +69,6 @@ def create_model(model_name: str):
 
 
 def extract_articles_summary(model, articles: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
-    """
-    Extracts topics and summaries from a list of articles using an AI model.
-
-    Args:
-        model: The AI model to generate summaries.
-        articles (List[Dict[str, Any]]): A list of articles, each containing a 'title' and 'text'.
-
-    Returns:
-        List[Dict[str, Any]]: A list of extracted summaries and topics for each article.
-    """
     prompt = (
         "You are an article summarizer tasked with extracting topics and summaries out of articles given to you.\n"
         "You can only communicate in pure, valid JSON. Do not use markdown code blocks, output just the JSON.\n"
@@ -129,20 +90,6 @@ def extract_articles_summary(model, articles: List[Dict[str, Any]]) -> List[Dict
 
 
 def extract_comparative_sentiment_score(model, articles: List[Dict[str, Any]]) -> ComparativeSentimentScore:
-    """
-    Extract a comparative sentiment score from a list of articles using the provided model.
-
-    This function first filters each article to retain only the 'title', 'sentiment', 'topics', and 'summary' keys.
-    It then constructs a prompt using the filtered articles and calls the generator function to obtain a JSON object 
-    containing coverage differences and topic overlap. The output is validated against the ComparativeSentimentScore schema.
-
-    Parameters:
-        model: The model instance to be used for generating the comparative sentiment score.
-        articles (List[Dict[str, Any]]): A list of articles in dictionary format.
-
-    Returns:
-        ComparativeSentimentScore: An instance of ComparativeSentimentScore containing the analysis.
-    """
     filtered_articles = [
         {k: article[k] for k in ('title', 'sentiment',
                                  'topics', 'summary') if k in article}
@@ -187,21 +134,6 @@ def extract_comparative_sentiment_score(model, articles: List[Dict[str, Any]]) -
 
 
 def extract_final_sentiment_analysis(model, company: str, comparative_score: Dict[str, Any]) -> str:
-    """
-    Generate a final sentiment analysis text for the given company based on comparative sentiment scores.
-
-    This function constructs a prompt that includes a JSON representation of the comparative sentiment scores
-    and instructs the model to produce a concise final sentiment analysis for an investor. The output is a string
-    containing the final analysis, with each sentence on a new line.
-
-    Parameters:
-        model: The model instance to be used for generating the final sentiment analysis.
-        company (str): The name of the company for which the analysis is being generated.
-        comparative_score (Dict[str, Any]): A dictionary containing the comparative sentiment score details.
-
-    Returns:
-        str: A concise final sentiment analysis text.
-    """
     prompt = (
         f"You are a market analyst tasked with generating a summarized company analysis for investors out of a comparative analysis for the {company} company given to you by your team. You can only write short sentences with each sentence appearing on a new line.\n"
         f"Below is a JSON object of comparative sentiment scores for the {company} company.\n"

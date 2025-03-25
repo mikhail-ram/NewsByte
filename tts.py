@@ -1,6 +1,3 @@
-"""
-Module for translating text to Hindi and generating Hindi text-to-speech (TTS) audio.
-"""
 import soundfile as sf
 import numpy as np
 from kokoro import KPipeline
@@ -9,17 +6,6 @@ from config import logger
 
 
 async def translate_text(text: str, src: str = 'auto', dest: str = 'hi') -> str:
-    """
-    Translate the given text asynchronously from the source language to Hindi.
-
-    Parameters:
-        text (str): The text to translate.
-        src (str, optional): The source language code (default is 'auto' to detect automatically).
-        dest (str, optional): The destination language code (default is 'hi' for Hindi).
-
-    Returns:
-        str: The translated text in Hindi.
-    """
     async with Translator() as translator:
         logger.debug("Translating text to Hindi.")
         result = await translator.translate(text, src=src, dest=dest)
@@ -27,16 +13,6 @@ async def translate_text(text: str, src: str = 'auto', dest: str = 'hi') -> str:
 
 
 def hindi_tts(text, output_path):
-    """
-    Generate Hindi text-to-speech audio from the provided text and save it to the specified output path.
-
-    Parameters:
-        text: The text to convert into speech.
-        output_path: The file path where the generated audio will be saved.
-
-    Raises:
-        ValueError: If no audio segments are generated from the text.
-    """
     pipeline = KPipeline(lang_code='h', repo_id='hexgrad/Kokoro-82M')
     logger.debug("Running Hindi TTS.")
     generator = pipeline(
