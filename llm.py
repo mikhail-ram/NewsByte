@@ -13,6 +13,20 @@ from config import logger
 
 
 def retry_prompt(generator_func, prompt: str, schema_type=None, retries: int = 3):
+    """Execute a prompt with retry logic for handling validation errors.
+
+    Args:
+        generator_func: The function that generates the response
+        prompt (str): The prompt to be sent to the model
+        schema_type: Optional Pydantic model for validation
+        retries (int, optional): Number of retry attempts. Defaults to 3.
+
+    Returns:
+        The validated response from the model
+
+    Raises:
+        Exception: If all retry attempts fail
+    """
     last_exception = None
 
     for attempt in range(retries):
@@ -60,6 +74,14 @@ def retry_prompt(generator_func, prompt: str, schema_type=None, retries: int = 3
 
 
 def create_model(model_name: str):
+    """Create an OpenAI model instance with OpenRouter configuration.
+
+    Args:
+        model_name (str): Name of the model to use
+
+    Returns:
+        An OpenAI model instance configured with OpenRouter
+    """
     client = AsyncOpenAI(
         api_key=os.environ.get("NEWSBYTE_API_KEY"),
         base_url="https://openrouter.ai/api/v1"
@@ -69,6 +91,15 @@ def create_model(model_name: str):
 
 
 def extract_articles_summary(model, articles: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    """Extract topics and summaries from a list of articles.
+
+    Args:
+        model: The language model instance
+        articles (List[Dict[str, Any]]): List of articles with 'title' and 'text' fields
+
+    Returns:
+        List[Dict[str, Any]]: List of article summaries with topics and summary fields
+    """
     prompt = (
         "You are an article summarizer tasked with extracting topics and summaries out of articles given to you.\n"
         "You can only communicate in pure, valid JSON. Do not use markdown code blocks, output just the JSON.\n"
@@ -90,6 +121,15 @@ def extract_articles_summary(model, articles: List[Dict[str, Any]]) -> List[Dict
 
 
 def extract_comparative_sentiment_score(model, articles: List[Dict[str, Any]]) -> ComparativeSentimentScore:
+    """Generate a comparative analysis of sentiment across multiple articles.
+
+    Args:
+        model: The language model instance
+        articles (List[Dict[str, Any]]): List of articles with title, sentiment, topics, and summary
+
+    Returns:
+        ComparativeSentimentScore: Object containing coverage differences and topic overlap analysis
+    """
     filtered_articles = [
         {k: article[k] for k in ('title', 'sentiment',
                                  'topics', 'summary') if k in article}
@@ -134,6 +174,16 @@ def extract_comparative_sentiment_score(model, articles: List[Dict[str, Any]]) -
 
 
 def extract_final_sentiment_analysis(model, company: str, comparative_score: Dict[str, Any]) -> str:
+    """Generate a final sentiment analysis for a company based on comparative scores.
+
+    Args:
+        model: The language model instance
+        company (str): Name of the company to analyze
+        comparative_score (Dict[str, Any]): Comparative analysis containing sentiment distribution and coverage differences
+
+    Returns:
+        str: Concise sentiment analysis for investors (max 4 sentences)
+    """
     prompt = (
         f"You are a market analyst tasked with generating a summarized company analysis for investors out of a comparative analysis for the {company} company given to you by your team. You can only write short sentences with each sentence appearing on a new line.\n"
         f"Below is a JSON object of comparative sentiment scores for the {company} company.\n"

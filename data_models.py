@@ -1,5 +1,5 @@
-from typing import List, Dict, Any
-from pydantic import BaseModel, conlist, RootModel, Field, model_validator
+from typing import List
+from pydantic import BaseModel, conlist, RootModel
 
 
 class ArticleSummary(BaseModel):
