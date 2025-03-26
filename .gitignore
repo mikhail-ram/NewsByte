@@ -1,5 +1,6 @@
 .qodo
 .DS_Store
+demo/
 __pycache__/
 *.wav
 *.json

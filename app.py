@@ -1,3 +1,14 @@
+"""Streamlit web interface for NewsByte application.
+
+This module provides a user-friendly web interface for the NewsByte application,
+allowing users to:
+1. Fetch news articles for a company
+2. Generate article summaries and topics
+3. Analyze sentiment
+4. View comparative sentiment scores
+5. Get final analysis with Hindi translation and audio
+"""
+
 import streamlit as st
 from streamlit_extras.tags import tagger_component
 import requests
@@ -5,8 +16,14 @@ import json
 
 from utils import to_snake_case, to_title_case
 
+# Constants
 BASE_URL = "http://localhost:8000"
 
+# UI Configuration
+"""
+Configure the Streamlit UI with custom CSS styles for consistent formatting
+and improved readability of the application.
+"""
 st.markdown(
     """
     <style>
@@ -25,6 +42,11 @@ st.markdown(
     """,
     unsafe_allow_html=True
 )
+
+# Application Header
+"""
+Display the application title and description.
+"""
 st.title("NewsByte")
 st.markdown(
     f'<div class="justified-text">NewsByte is a web app that fetches news about a company, summarizes articles, analyzes sentiment, compares trends, and generates a Hindi audio summary. Built with Python, FastAPI, and Streamlit.</div>',
@@ -32,6 +54,13 @@ st.markdown(
 )
 st.write("")
 
+# Step 1: Article Fetching
+"""
+Handle the first step of the analysis pipeline:
+1. Allow users to input a company name
+2. Fetch raw articles from the API
+3. Display articles with their metadata and content
+"""
 st.header("Step 1: Fetch Raw Articles")
 company = st.text_input("Enter Company Name")
 
@@ -67,6 +96,12 @@ if "articles" in st.session_state:
             )
             st.write("")
 
+# Step 2: Article Summarization
+"""
+Handle the second step of the analysis pipeline:
+1. Generate summaries and topics for fetched articles
+2. Display articles with their summaries and identified topics
+"""
 st.header("Step 2: Generate Summaries and Topics")
 if st.button("Summarize Articles"):
     payload = {"articles": st.session_state.articles}
@@ -99,6 +134,12 @@ if "summarized_articles" in st.session_state:
             )
             st.write("")
 
+# Step 3: Sentiment Analysis
+"""
+Handle the third step of the analysis pipeline:
+1. Analyze sentiment for each article
+2. Display articles with their sentiment scores and visual indicators
+"""
 st.header("Step 3: Attach Sentiment Analysis")
 if st.button("Analyze Sentiment"):
     payload = {"articles": st.session_state.summarized_articles}
@@ -140,6 +181,12 @@ if "articles_with_sentiment" in st.session_state:
             )
             st.write("")
 
+# Step 4: Comparative Analysis
+"""
+Handle the fourth step of the analysis pipeline:
+1. Generate comparative sentiment scores
+2. Display coverage differences, topic overlap, and sentiment distribution
+"""
 st.header("Step 4: Comparative Sentiment Score")
 if st.button("Get Comparative Sentiment Score"):
     payload = {"articles": st.session_state.articles_with_sentiment}
@@ -222,6 +269,14 @@ if "comp_sentiment" in st.session_state:
                          color_name=[overall_color])
 
 
+# Step 5: Final Analysis and Audio Generation
+"""
+Handle the final step of the analysis pipeline:
+1. Generate final sentiment analysis
+2. Translate the analysis to Hindi
+3. Generate audio from the translated text
+4. Provide download options for the complete analysis
+"""
 st.header("Step 5: Final Analysis & TTS")
 if st.button("Get Final Analysis"):
     payload = {

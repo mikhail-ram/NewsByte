@@ -1,3 +1,14 @@
+"""FastAPI backend for NewsByte application.
+
+This module provides the FastAPI backend server for the NewsByte application,
+exposing REST endpoints for:
+1. Fetching news articles
+2. Generating article summaries
+3. Analyzing sentiment
+4. Computing comparative sentiment scores
+5. Generating final analysis with translation and audio
+"""
+
 import nltk
 import spacy
 import os

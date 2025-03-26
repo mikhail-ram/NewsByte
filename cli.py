@@ -1,3 +1,10 @@
+"""Command-line interface for NewsByte application.
+
+This module provides a command-line interface for running the NewsByte analysis pipeline.
+It allows users to analyze company news articles from the terminal, with options to
+specify the company name and number of articles to analyze.
+"""
+
 import argparse
 from typing import Dict, Any
 import asyncio

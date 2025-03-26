@@ -1,3 +1,12 @@
+"""Language model interface for NewsByte application.
+
+This module provides functions for interacting with language models to:
+1. Extract article summaries and topics
+2. Generate comparative sentiment analysis
+3. Create final sentiment analysis
+It includes retry logic and error handling for robust model interactions.
+"""
+
 from pydantic import ValidationError
 import os
 import json

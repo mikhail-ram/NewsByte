@@ -1,3 +1,10 @@
+"""Sentiment analysis module for NewsByte application.
+
+This module provides functions for analyzing sentiment in articles,
+attaching sentiment scores to articles, and calculating sentiment distributions.
+It uses a sentiment analyzer to classify text as Positive, Neutral, or Negative.
+"""
+
 from collections import Counter
 from typing import List, Dict, Any
 
