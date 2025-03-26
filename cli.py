@@ -12,6 +12,28 @@ from tts import translate_text, hindi_tts
 
 
 def run_newsbyte(company: str, num_articles: int = 10) -> Dict[str, Any]:
+    """Run the complete NewsByte analysis pipeline for a given company.
+
+    This function orchestrates the entire analysis process:
+    1. Fetches news articles
+    2. Extracts topics and summaries
+    3. Performs sentiment analysis
+    4. Generates comparative analysis
+    5. Creates final analysis with translation and audio
+
+    Args:
+        company (str): Name of the company to analyze
+        num_articles (int, optional): Number of articles to fetch. Defaults to 10.
+
+    Returns:
+        Dict[str, Any]: Dictionary containing:
+            - Company name
+            - Processed articles with sentiment
+            - Comparative sentiment scores
+            - Final analysis
+            - Translated analysis
+            - Audio file path
+    """
     model = create_model("deepseek/deepseek-r1:free")
     sentiment_analyzer = pipeline(
         "sentiment-analysis", model="nlptown/bert-base-multilingual-uncased-sentiment")
