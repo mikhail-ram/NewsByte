@@ -38,12 +38,15 @@ company = st.text_input("Enter Company Name")
 
 if st.button("Fetch Raw Articles"):
     payload = {"company": company, "num_articles": 10}
-    response = requests.post(f"{BASE_URL}/fetch_articles", json=payload)
-    if response.ok:
-        articles = response.json()
-        st.session_state.articles = articles
-    else:
-        st.error("Failed to fetch raw articles.")
+    try:
+        response = requests.post(f"{BASE_URL}/fetch_articles", json=payload)
+        if response.ok:
+            articles = response.json()
+            st.session_state.articles = articles
+        else:
+            st.error("Failed to fetch raw articles.")
+    except requests.exceptions.ConnectionError:
+        st.warning("The backend is still starting up (downloading AI models). Please wait a minute and try again.")
 
 if "articles" in st.session_state:
     for idx, article in enumerate(st.session_state.articles, start=1):
@@ -72,13 +75,16 @@ if "articles" in st.session_state:
 st.header("Step 2: Generate Summaries and Topics")
 if st.button("Summarize Articles"):
     payload = {"articles": st.session_state.articles}
-    response = requests.post(
-        f"{BASE_URL}/summarize_articles", json=payload)
-    if response.ok:
-        summarized_articles = response.json()
-        st.session_state.summarized_articles = summarized_articles
-    else:
-        st.error("Failed to generate summaries.")
+    try:
+        response = requests.post(
+            f"{BASE_URL}/summarize_articles", json=payload)
+        if response.ok:
+            summarized_articles = response.json()
+            st.session_state.summarized_articles = summarized_articles
+        else:
+            st.error("Failed to generate summaries.")
+    except requests.exceptions.ConnectionError:
+        st.warning("The backend is still starting up (downloading AI models). Please wait a minute and try again.")
 
 if "summarized_articles" in st.session_state:
     for idx, article in enumerate(st.session_state.summarized_articles, start=1):
@@ -104,12 +110,15 @@ if "summarized_articles" in st.session_state:
 st.header("Step 3: Attach Sentiment Analysis")
 if st.button("Analyze Sentiment"):
     payload = {"articles": st.session_state.summarized_articles}
-    response = requests.post(f"{BASE_URL}/analyze_sentiment", json=payload)
-    if response.ok:
-        articles_with_sentiment = response.json()
-        st.session_state.articles_with_sentiment = articles_with_sentiment
-    else:
-        st.error("Failed to analyze sentiment.")
+    try:
+        response = requests.post(f"{BASE_URL}/analyze_sentiment", json=payload)
+        if response.ok:
+            articles_with_sentiment = response.json()
+            st.session_state.articles_with_sentiment = articles_with_sentiment
+        else:
+            st.error("Failed to analyze sentiment.")
+    except requests.exceptions.ConnectionError:
+        st.warning("The backend is still starting up (downloading AI models). Please wait a minute and try again.")
 
 if "articles_with_sentiment" in st.session_state:
     for idx, article in enumerate(st.session_state.articles_with_sentiment, start=1):
@@ -145,13 +154,16 @@ if "articles_with_sentiment" in st.session_state:
 st.header("Step 4: Comparative Sentiment Score")
 if st.button("Get Comparative Sentiment Score"):
     payload = {"articles": st.session_state.articles_with_sentiment}
-    response = requests.post(
-        f"{BASE_URL}/get_comparative_sentiment", json=payload)
-    if response.ok:
-        comp_sentiment = response.json()
-        st.session_state.comp_sentiment = comp_sentiment
-    else:
-        st.error("Failed to get comparative sentiment score.")
+    try:
+        response = requests.post(
+            f"{BASE_URL}/get_comparative_sentiment", json=payload)
+        if response.ok:
+            comp_sentiment = response.json()
+            st.session_state.comp_sentiment = comp_sentiment
+        else:
+            st.error("Failed to get comparative sentiment score.")
+    except requests.exceptions.ConnectionError:
+        st.warning("The backend is still starting up (downloading AI models). Please wait a minute and try again.")
 
 
 if "comp_sentiment" in st.session_state:
@@ -228,12 +240,15 @@ st.header("Step 5: Final Analysis & TTS")
 if st.button("Get Final Analysis"):
     payload = {
         "comp_score_dict": st.session_state.comp_sentiment, "company": company}
-    response = requests.post(f"{BASE_URL}/final_analysis", json=payload)
-    if response.ok:
-        analysis = response.json()
-        st.session_state.analysis = analysis
-    else:
-        st.error("Failed to get final analysis.")
+    try:
+        response = requests.post(f"{BASE_URL}/final_analysis", json=payload)
+        if response.ok:
+            analysis = response.json()
+            st.session_state.analysis = analysis
+        else:
+            st.error("Failed to get final analysis.")
+    except requests.exceptions.ConnectionError:
+        st.warning("The backend is still starting up (downloading AI models). Please wait a minute and try again.")
 
 if "analysis" in st.session_state:
     with st.container(border=True):
