@@ -91,8 +91,11 @@ def create_model(model_name: str):
     Returns:
         An OpenAI model instance configured with OpenRouter
     """
+    api_key = os.environ.get("NEWSBYTE_API_KEY")
+    if not api_key:
+        api_key = "dummy_key_to_avoid_crash"
     client = AsyncOpenAI(
-        api_key=os.environ.get("NEWSBYTE_API_KEY"),
+        api_key=api_key,
         base_url="https://openrouter.ai/api/v1"
     )
     config = OpenAIConfig(model_name)

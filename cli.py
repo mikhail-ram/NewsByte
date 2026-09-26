@@ -41,7 +41,7 @@ def run_newsbyte(company: str, num_articles: int = 10) -> Dict[str, Any]:
             - Translated analysis
             - Audio file path
     """
-    model = create_model("deepseek/deepseek-r1:free")
+    model = create_model("meta-llama/llama-3.2-3b-instruct:free")
     sentiment_analyzer = pipeline(
         "sentiment-analysis", model="nlptown/bert-base-multilingual-uncased-sentiment")
 

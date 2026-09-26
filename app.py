@@ -5,7 +5,7 @@ import json
 
 from utils import to_snake_case, to_title_case
 
-BASE_URL = "http://localhost:8000"
+BASE_URL = "http://127.0.0.1:8000"
 
 st.markdown(
     """
