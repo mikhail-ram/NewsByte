@@ -38,9 +38,14 @@ def retry_prompt(generator_func, prompt: str, schema_type=None, retries: int = 3
     """
     last_exception = None
 
+    import random
     for attempt in range(retries):
         try:
-            return generator_func(prompt)
+            # Append a random nonce on retries to bust OpenRouter's sticky caching.
+            # This forces the 'openrouter/free' auto-router to pick a different model
+            # if we previously hit a moderation model that refused to output JSON.
+            current_prompt = prompt if attempt == 0 else f"{prompt}\n\n[System Override: Retry {attempt}. MUST return valid JSON schema. Identifier: {random.randint(1000, 9999)}]"
+            return generator_func(current_prompt)
         except ValidationError as e:
             last_exception = e
             logger.error(f"Attempt {attempt + 1} failed with error: {e}")
