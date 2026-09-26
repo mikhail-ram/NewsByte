@@ -77,6 +77,8 @@ def retry_prompt(generator_func, prompt: str, schema_type=None, retries: int = 3
         except Exception as e:
             last_exception = e
             logger.error(f"Attempt {attempt + 1} failed with error: {e}")
+            import time
+            time.sleep(2)
 
     raise Exception(
         f"LLM prompt failed after {retries} attempts. Last error: {last_exception}")
