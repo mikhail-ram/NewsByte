@@ -41,7 +41,7 @@ def run_newsbyte(company: str, num_articles: int = 10) -> Dict[str, Any]:
             - Translated analysis
             - Audio file path
     """
-    model = create_model("openrouter/free")
+    model = create_model("google/gemma-4-31b-it:free")
     sentiment_analyzer = pipeline(
         "sentiment-analysis", model="nlptown/bert-base-multilingual-uncased-sentiment")
 
