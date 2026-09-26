@@ -15,7 +15,7 @@ from scraping import fetch_news_articles
 from analysis import attach_sentiment_to_articles, merge_articles, get_sentiment_distribution
 from llm import create_model, extract_articles_summary, extract_comparative_sentiment_score, extract_final_sentiment_analysis
 from utils import save_news_to_json
-from tts import translate_text, hindi_tts
+from tts import hindi_tts
 
 
 def run_newsbyte(company: str, num_articles: int = 10) -> Dict[str, Any]:
@@ -41,7 +41,7 @@ def run_newsbyte(company: str, num_articles: int = 10) -> Dict[str, Any]:
             - Translated analysis
             - Audio file path
     """
-    model = create_model("openrouter/free")
+    model = create_model("google/gemma-4-31b-it:free,qwen/qwen3.8-27b:free")
     sentiment_analyzer = pipeline(
         "sentiment-analysis", model="nlptown/bert-base-multilingual-uncased-sentiment")
 
@@ -72,7 +72,16 @@ def run_newsbyte(company: str, num_articles: int = 10) -> Dict[str, Any]:
         model, company, comp_score_dict)
 
     logger.debug("Translating final sentiment analysis.")
-    translated_final_analysis = asyncio.run(translate_text(final_analysis))
+    from outlines import generate
+    from llm import retry_prompt
+    trans_prompt = f"Translate the following financial analysis into fluent Hindi. Output ONLY the Hindi text and nothing else:\n\n{final_analysis}"
+    trans_generator = generate.text(model)
+    def trans_safe_generator(p):
+        res = trans_generator(p)
+        if len(res.strip()) < 5:
+            raise ValueError("Translation too short")
+        return res
+    translated_final_analysis = retry_prompt(trans_safe_generator, trans_prompt, retries=2)
 
     logger.debug("Running TTS for final sentiment analysis.")
     output_tts_path = "hindi_tts.wav"

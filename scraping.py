@@ -59,21 +59,26 @@ def extract_article_text(url: str) -> Optional[Dict[str, Any]]:
         Optional[Dict[str, Any]]: Dictionary containing article text, authors, and publish date, or None if extraction fails
     """
     try:
-        article = Article(url, headers={'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'})
-        article.download()
-        article.parse()
-        article_text = article.text
+        article_text = ""
+        downloaded = trafilatura.fetch_url(url)
+        if downloaded:
+            extracted = trafilatura.extract(downloaded)
+            if extracted:
+                article_text = extracted
+
         if not article_text or len(article_text.split()) < 100:
-            downloaded = trafilatura.fetch_url(url)
-            if downloaded:
-                trafilatura_text = trafilatura.extract(downloaded)
-                if trafilatura_text and len(trafilatura_text.split()) > len(article_text.split()):
-                    article_text = trafilatura_text
+            article = Article(url, headers={'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'})
+            article.download()
+            article.parse()
+            if article.text and len(article.text.split()) > len(article_text.split()):
+                article_text = article.text
+
         logger.debug(f"Extracted text from article at {url}")
+        
+        # We no longer rely on newspaper3k for authors/date because it fails on Yahoo pages.
+        # These will be populated from the API JSON instead.
         return {
             "text": article_text,
-            "authors": article.authors,
-            "publish_date": str(article.publish_date) if article.publish_date else None
         }
     except Exception as e:
         logger.error(f"Error extracting article details for URL {url}: {e}")
@@ -99,13 +104,25 @@ def process_candidate(entry: Dict[str, Any]) -> Optional[Dict[str, Any]]:
     logger.debug(f"Processing candidate - Title: {title} | Link: {link}")
     
     candidate = {"title": title, "link": link}
+    
+    # Grab publisher and format the unix timestamp
+    publisher = entry.get("publisher", "Unknown")
+    candidate["authors"] = [publisher]
+    
+    pub_time = entry.get("providerPublishTime")
+    if pub_time:
+        import datetime
+        candidate["publish_date"] = datetime.datetime.fromtimestamp(pub_time).strftime('%Y-%m-%d %H:%M:%S')
+    else:
+        candidate["publish_date"] = "Unknown"
+        
     details = extract_article_text(link)
     
-    if details is None or not details["text"] or not is_english(details["text"]):
+    if details is None or not details.get("text") or not is_english(details["text"]):
         logger.debug("Skipping candidate due to non-English text or empty content.")
         return None
         
-    candidate.update(details)
+    candidate["text"] = details["text"]
     return candidate
 
 

@@ -23,7 +23,7 @@ from transformers import pipeline
 from scraping import fetch_news_articles
 from analysis import attach_sentiment_to_articles, merge_articles, get_sentiment_distribution
 from llm import create_model, extract_articles_summary, extract_comparative_sentiment_score, extract_final_sentiment_analysis
-from tts import translate_text, hindi_tts
+from tts import hindi_tts
 
 # Initialize the model at startup
 
@@ -50,7 +50,8 @@ async def lifespan(app: FastAPI):
     nltk.download('stopwords', download_dir=nltk_data_dir, quiet=True)
     nlp_spacy = spacy.load("en_core_web_sm")  # might be optional
 
-    app.state.model = create_model("openrouter/free")
+    # Use a comma-separated list of reliable models for automatic fallback
+    app.state.model = create_model("google/gemma-4-31b-it:free,qwen/qwen3.8-27b:free")
     # qwen/qwq-32b:free, deepseek/deepseek-r1:free, meta-llama/llama-3.2-3b-instruct: free
     app.state.sentiment_analyzer = pipeline(
         "sentiment-analysis", model="nlptown/bert-base-multilingual-uncased-sentiment")
@@ -195,7 +196,21 @@ def final_analysis_endpoint(req: FinalAnalysisRequest):
         model = app.state.model
         final_analysis = extract_final_sentiment_analysis(
             model, req.company, req.comp_score_dict)
-        translated_final_analysis = asyncio.run(translate_text(final_analysis))
+        
+        # Use LLM for translation instead of googletrans (which silently fails and returns English)
+        from outlines import generate
+        from llm import retry_prompt
+        trans_prompt = f"Translate the following financial analysis into fluent Hindi. Output ONLY the Hindi text and nothing else:\n\n{final_analysis}"
+        trans_generator = generate.text(model)
+        
+        def trans_safe_generator(p):
+            res = trans_generator(p)
+            if len(res.strip()) < 5:
+                raise ValueError("Translation too short")
+            return res
+            
+        translated_final_analysis = retry_prompt(trans_safe_generator, trans_prompt, retries=2)
+        
         output_tts_path = "hindi_tts.wav"
         hindi_tts(translated_final_analysis, output_tts_path)
         return {
