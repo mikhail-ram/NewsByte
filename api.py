@@ -50,6 +50,7 @@ async def lifespan(app: FastAPI):
     nltk.download('stopwords', download_dir=nltk_data_dir, quiet=True)
     nlp_spacy = spacy.load("en_core_web_sm")  # might be optional
 
+    # Use the free router since explicit fallbacks didn't bypass global 429s.
     app.state.model = create_model("openrouter/free")
     # qwen/qwq-32b:free, deepseek/deepseek-r1:free, meta-llama/llama-3.2-3b-instruct: free
     app.state.sentiment_analyzer = pipeline(
