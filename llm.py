@@ -214,5 +214,11 @@ def extract_final_sentiment_analysis(model, company: str, comparative_score: Dic
         f"{json.dumps(comparative_score, separators=(',', ':'))}\n\n"
     )
     generator = generate.text(model)
-    result = retry_prompt(generator, prompt, 3)
+    def safe_generator(p):
+        res = generator(p)
+        if "User Safety: safe" in res or "I cannot fulfill this request" in res or len(res.strip()) < 20:
+            raise ValueError(f"Model returned moderation response or invalid text: {res}")
+        return res
+        
+    result = retry_prompt(safe_generator, prompt, retries=3)
     return result

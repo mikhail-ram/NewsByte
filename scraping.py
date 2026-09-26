@@ -1,11 +1,11 @@
 """Web scraping module for NewsByte application.
 
 This module handles fetching and processing news articles from various sources,
-including Bing News RSS and article content extraction.
+including Yahoo Finance API and article content extraction.
 """
 
 import urllib.parse
-import feedparser
+import requests
 from newspaper import Article
 import trafilatura
 from langdetect import detect
@@ -14,19 +14,24 @@ import time
 
 from config import logger
 
-def build_search_url(company_name: str) -> str:
-    """Build a Bing News RSS search URL for a given company.
+
+def build_search_url(company_name: str, num_articles: int = 10) -> str:
+    """Build a Yahoo Finance Search API URL for a given company.
 
     Args:
         company_name (str): Name of the company to search for
+        num_articles (int): Number of news articles to request
 
     Returns:
-        str: Complete Bing News RSS search URL
+        str: Complete Yahoo Finance Search API URL
     """
-    encoded_company = urllib.parse.quote_plus(f"{company_name} news")
-    url = f"https://www.bing.com/news/search?q={encoded_company}&format=rss&setlang=en-us&setmkt=en-us"
+    encoded_company = urllib.parse.quote_plus(company_name)
+    # Request a few extra articles to account for non-English or un-scrapeable links
+    news_count = min(num_articles + 10, 30)
+    url = f"https://query2.finance.yahoo.com/v1/finance/search?q={encoded_company}&newsCount={news_count}"
     logger.debug(f"Built search URL: {url}")
     return url
+
 
 def is_english(text: str) -> bool:
     """Check if text is in English.
@@ -43,6 +48,7 @@ def is_english(text: str) -> bool:
         logger.error(f"Language detection failed: {e}")
         return False
 
+
 def extract_article_text(url: str) -> Optional[Dict[str, Any]]:
     """Extract article text and metadata from a URL.
 
@@ -53,7 +59,7 @@ def extract_article_text(url: str) -> Optional[Dict[str, Any]]:
         Optional[Dict[str, Any]]: Dictionary containing article text, authors, and publish date, or None if extraction fails
     """
     try:
-        article = Article(url, headers={'User-Agent': 'Mozilla/5.0'})
+        article = Article(url, headers={'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'})
         article.download()
         article.parse()
         article_text = article.text
@@ -73,11 +79,12 @@ def extract_article_text(url: str) -> Optional[Dict[str, Any]]:
         logger.error(f"Error extracting article details for URL {url}: {e}")
         return None
 
-def process_candidate(entry: Any) -> Optional[Dict[str, Any]]:
-    """Process an RSS entry into a complete article.
+
+def process_candidate(entry: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+    """Process a Yahoo Finance news entry into a complete article.
 
     Args:
-        entry (Any): RSS feed entry to process
+        entry (Dict[str, Any]): News entry from Yahoo Finance API
 
     Returns:
         Optional[Dict[str, Any]]: Complete article data or None if processing fails
@@ -101,6 +108,7 @@ def process_candidate(entry: Any) -> Optional[Dict[str, Any]]:
     candidate.update(details)
     return candidate
 
+
 def fetch_news_articles(company: str, num_articles: int) -> List[Dict[str, Any]]:
     """Fetch a specified number of news articles for a company.
 
@@ -111,13 +119,25 @@ def fetch_news_articles(company: str, num_articles: int) -> List[Dict[str, Any]]
     Returns:
         List[Dict[str, Any]]: List of complete article data
     """
-    search_url = build_search_url(company)
-    logger.debug(f"Fetching RSS feed from: {search_url}")
+    search_url = build_search_url(company, num_articles)
+    logger.debug(f"Fetching news from Yahoo Finance API: {search_url}")
     
-    feed = feedparser.parse(search_url)
+    headers = {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
+    }
+    
+    try:
+        response = requests.get(search_url, headers=headers, timeout=10)
+        response.raise_for_status()
+        data = response.json()
+        news_items = data.get("news", [])
+    except Exception as e:
+        logger.error(f"Failed to fetch from Yahoo Finance API: {e}")
+        return []
+
     articles = []
     
-    for entry in feed.entries:
+    for entry in news_items:
         if len(articles) >= num_articles:
             break
             
